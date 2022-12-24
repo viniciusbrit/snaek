@@ -1,12 +1,11 @@
 // SNAEK by viniciusbrit
-// Version: 0.7 [24/12/2022]
+// Version: 0.8 [24/12/2022]
 
 // Compile using: gcc -o snaek snaek.c -lncurses
 
 /*
 Things to do:
 -Implement grace turns before an imminent death
--Limit snake movement to prevent backward instant death
 -Fix snake appearing to move faster on vertical directions
 -Add timer and points collected to the top title bar
 -Implement menu system
@@ -32,6 +31,7 @@ struct Snake
     int y[MAX_X * MAX_Y];
     int length;
     int direction;
+    int previousdir;
 };
 struct Snake snake;
 
@@ -153,19 +153,35 @@ int main()
         switch (c)
         {
         case 'w':
+            snake.previousdir = snake.direction;
+            if (snake.previousdir != DOWN)
+            {
             snake.direction = UP;
+            }
             break;
         case 's':
+            snake.previousdir = snake.direction;
+            if (snake.previousdir != UP)
+            {
             snake.direction = DOWN;
+            }
             break;
         case 'a':
+            snake.previousdir = snake.direction;
+            if (snake.previousdir != RIGHT)
+            {
             snake.direction = LEFT;
+            }
             break;
         case 'd':
+            snake.previousdir = snake.direction;
+            if (snake.previousdir != LEFT)
+            {
             snake.direction = RIGHT;
+            }
             break;
         }
-
+        
         moveSnake();
 
         // check if the head of the snake is colliding with any dots

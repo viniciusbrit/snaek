@@ -1,12 +1,11 @@
 // SNAEK by viniciusbrit
-// Version: 0.8 [24/12/2022]
+// Version: 0.9 [25/12/2022]
 
 // Compile using: gcc -o snaek snaek.c -lncurses
 
 /*
 Things to do:
 -Implement grace turns before an imminent death
--Fix snake appearing to move faster on vertical directions
 -Add timer and points collected to the top title bar
 -Implement menu system
 */
@@ -157,6 +156,7 @@ int main()
             if (snake.previousdir != DOWN)
             {
             snake.direction = UP;
+            timeout(175);
             }
             break;
         case 's':
@@ -164,6 +164,7 @@ int main()
             if (snake.previousdir != UP)
             {
             snake.direction = DOWN;
+            timeout(175);
             }
             break;
         case 'a':
@@ -171,6 +172,7 @@ int main()
             if (snake.previousdir != RIGHT)
             {
             snake.direction = LEFT;
+            timeout(100);
             }
             break;
         case 'd':
@@ -178,6 +180,7 @@ int main()
             if (snake.previousdir != LEFT)
             {
             snake.direction = RIGHT;
+            timeout(100);
             }
             break;
         }

@@ -1,10 +1,9 @@
 # snaek
 A stupid little ncurses snake game.
-### Current Version: 0.8 [24/12/2022]
+### Current Version: 0.9 [24/12/2022]
 
 ### Things to do:
 * Implement grace turns before an imminent death
-* Fix snake appearing to move faster on vertical directions
 * Add timer and points collected to the top title bar
 * Implement menu system
 

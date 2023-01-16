@@ -1,13 +1,12 @@
 // SNAEK by viniciusbrit
-// Version: 0.9 [25/12/2022]
+// Version: 0.10 [16/01/2023]
 
 // Compile using: gcc -o snaek snaek.c -lncurses
 
 /*
 Things to do:
 -Implement grace turns before an imminent death
--Add timer and points collected to the top title bar
--Implement menu system
+-Add timer to the top title bar
 */
 
 #include <curses.h>
@@ -24,6 +23,9 @@ Things to do:
 #define LEFT 3
 #define RIGHT 4
 
+// for starting the game
+int gamestatus = 0;
+
 struct Snake
 {
     int x[MAX_X * MAX_Y];
@@ -39,7 +41,7 @@ struct Dot
     int x;
     int y;
 };
-#define MAX_DOTS 10
+#define MAX_DOTS 15
 struct Dot dots[MAX_DOTS];
 
 int numDots = 0;
@@ -115,8 +117,46 @@ int main()
     initscr();
     noecho();
     cbreak();
-    timeout(100); // set the input timeout to 100ms
     start_color();
+
+    // color pairs
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_WHITE, COLOR_BLACK);
+    init_pair(5, COLOR_BLACK, COLOR_WHITE);
+
+    clear();
+    attron(COLOR_PAIR(4));
+    move(6, 20);
+    printw("####### ###    ##  #####  ###### ##  ###");
+    move(7, 20);
+    printw("###     ####   ## ##   ## ##     ## ###");
+    move(8, 20);
+    printw("####### ## ##  ## ####### #####  ######");
+    move(9, 20);
+    printw("    ### ##  ##### ##   ## ###    ### ###");
+    move(10, 20);
+    printw("####### ##   #### ##   ## ###### ###  ##"); 
+    attroff(COLOR_PAIR(4));
+    attron(COLOR_PAIR(5));
+    move(12, 32);
+    printw("PRESS E TO START");
+    move(13, 32);
+    printw("PRESS Q TO QUIT");
+    attroff(COLOR_PAIR(6));
+
+    // game start/quit menu
+    int startkey = getch();
+
+    switch (startkey)
+    {
+        case 'q':
+            endwin();
+            exit(0);
+        case 'e':
+            gamestatus = 1;
+    }
 
     // initialize the snake
     snake.x[0] = MAX_X / 2;
@@ -130,11 +170,6 @@ int main()
         snake.y[i] = snake.y[0];
     }
 
-    // color pairs
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-
     // seed the random number generator
     srand(time(NULL));
 
@@ -144,10 +179,11 @@ int main()
         spawnDot();
     }
 
-    while (1)
+    timeout(100);
+
+    while (gamestatus)
     {
         int c = getch();
-
         // update the direction of the snake based on the user input
         switch (c)
         {
@@ -184,7 +220,6 @@ int main()
             }
             break;
         }
-        
         moveSnake();
 
         // check if the head of the snake is colliding with any dots
@@ -213,32 +248,6 @@ int main()
         // clear the screen
         clear();
 
-        // draw the title bar
-        attron(COLOR_PAIR(3));
-        move(0, 20);
-        printw("####### ###    ##  #####  ###### ##  ##    by viniciusbrit");
-        move(1, 20);
-        printw("##\\     ####   ## ##   ## ##     ## ###"); // double backslash for proper formatting
-        move(2, 20);
-        printw("####### ## ##  ## ####### #####  ######"); // double backslash for proper formatting
-        move(3, 20);
-        printw("    /## ##  ##### ##   ## ###    ### ###"); // double backslash for proper formatting
-        move(4, 20);
-        printw("####### ##   #### ##   ## ###### ###  ##");
-        attroff(COLOR_PAIR(3));
-
-        // draw the border
-        for (int i = 0; i < MAX_X; i++)
-        {
-            mvaddch(5, i, ACS_CKBOARD); // starting border height is 5 because of the title
-            mvaddch(MAX_Y + 5, i, ACS_CKBOARD); //
-        }
-        for (int i = 5; i < (MAX_Y + 5); i++) // starting border height is 5 because of the title
-        {
-            mvaddch(i, 0, ACS_CKBOARD);
-            mvaddch(i, MAX_X - 1, ACS_CKBOARD);
-        }
-
         // draw the snake
         attron(COLOR_PAIR(1));
         mvaddch(snake.y[0], snake.x[0], ACS_BLOCK);
@@ -258,8 +267,36 @@ int main()
             attroff(COLOR_PAIR(3));
         }
 
+        // draw the title bar
+        attron(COLOR_PAIR(3));
+        move(0, 20);
+        printw("####### ###    ##  #####  ###### ##  ###");
+        move(1, 20);
+        printw("###     ####   ## ##   ## ##     ## ###");
+        move(2, 20);
+        printw("####### ## ##  ## ####### #####  ######");
+        move(3, 20);
+        printw("    ### ##  ##### ##   ## ###    ### ###");
+        move(4, 20);
+        printw("####### ##   #### ##   ## ###### ###  ##"); 
+        move(1,3);
+        printw("[SCORE: %d]", score);
+        attroff(COLOR_PAIR(3));
+
+        // draw the border
+        // drawing the border last eliminates terminal cursor from showing up elsewhere
+        for (int i = 0; i < MAX_X; i++)
+        {
+            mvaddch(5, i, ACS_CKBOARD); // starting border height is 5 because of the title
+            mvaddch(MAX_Y + 5, i, ACS_CKBOARD); //
+        }
+        for (int i = 5; i < (MAX_Y + 5); i++) // starting border height is 5 because of the title
+        {
+            mvaddch(i, 0, ACS_CKBOARD);
+            mvaddch(i, MAX_X - 1, ACS_CKBOARD);
+        }
+
         // refresh the screen
         refresh();
     }
-    return 0;
 }
